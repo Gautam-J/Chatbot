@@ -30,7 +30,7 @@ def plotSamplePostionalEncoding():
 
 def plotSampleEncoderLayer():
     sampleEncoderLayer = getEncoderLayer(
-        units=2048,
+        units=512,
         d_model=256,
         num_heads=8,
         dropout=0.1,
@@ -45,8 +45,8 @@ def plotSampleEncoderLayer():
 def plotSampleEncoderBlock():
     sampleEncoderBlock = getEncoderBlock(
         vocab_size=8226,
-        num_layers=6,
-        units=2048,
+        num_layers=2,
+        units=512,
         d_model=256,
         num_heads=8,
         dropout=0.1,
@@ -60,7 +60,7 @@ def plotSampleEncoderBlock():
 
 def plotSampleDecoderLayer():
     sampleDecoderLayer = getDecoderLayer(
-        units=2048,
+        units=512,
         d_model=256,
         num_heads=8,
         dropout=0.1,
@@ -75,8 +75,8 @@ def plotSampleDecoderLayer():
 def plotSampleDecoderBlock():
     sampleDecoderBlock = getDecoderBlock(
         vocab_size=8226,
-        num_layers=6,
-        units=2048,
+        num_layers=2,
+        units=512,
         d_model=256,
         num_heads=8,
         dropout=0.1,
@@ -91,8 +91,8 @@ def plotSampleDecoderBlock():
 def plotSampleTransformerModel():
     sampleTransformerModel = getTransformerModel(
         vocab_size=8226,
-        num_layers=6,
-        units=2048,
+        num_layers=2,
+        units=512,
         d_model=256,
         num_heads=8,
         dropout=0.1,

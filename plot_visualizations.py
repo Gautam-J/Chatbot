@@ -8,8 +8,6 @@ from model_configs import (
     CustomSchedule
 )
 
-from data_configs import loadConversations
-
 import seaborn as sns
 import tensorflow as tf
 import matplotlib.pyplot as plt

@@ -1,37 +1,47 @@
 import tensorflow as tf
-from tensorflow_datasets.features.text import SubwordTextEncoder
+import tensorflow_datasets as tfds
 
+import train
+import data_configs
+from data_configs import preprocessSentence
 from model_configs import getTransformerModel
-from data_configs import preprocessSentence, START_TOKEN, END_TOKEN, maxlen
 
 
 def loadTrainedTransformerModel():
-    model = getTransformerModel()
-    model.load_weights('models/modelWeights.hdf5')
+    model = getTransformerModel(
+        vocab_size=data_configs.VOCAB_SIZE,
+        num_layers=train.NUM_LAYERS,
+        units=train.UNITS,
+        d_model=train.D_MODEL,
+        num_heads=train.NUM_HEADS,
+        dropout=train.DROPOUT
+    )
+
+    model.load_weights('models/final_model_weight.hdf5')
 
     return model
 
 
 def loadFitTokenizer():
-    return SubwordTextEncoder.load_from_file('models/myTokenizer')
+    return tfds.features.text.SubwordTextEncoder.load_from_file('models/myTokenizer')
 
 
 def evaluate(sentence, model, tokenizer):
     sentence = preprocessSentence(sentence)
 
     sentence = tf.expand_dims(
-        START_TOKEN + tokenizer.encode(sentence) + END_TOKEN,
+        data_configs.START_TOKEN + tokenizer.encode(sentence) + data_configs.END_TOKEN,
         axis=0
     )
 
-    output = tf.expand_dims(START_TOKEN, 0)
+    output = tf.expand_dims(data_configs.START_TOKEN, 0)
 
-    for i in range(maxlen):
+    for i in range(train.MAXLEN):
         predictions = model.predict([sentence, output])
         predictions = predictions[:, -1:, :]
         predictedID = tf.cast(tf.argmax(predictions, axis=-1), tf.int32)
 
-        if tf.equal(predictedID, END_TOKEN[0]):
+        if tf.equal(predictedID, data_configs.END_TOKEN[0]):
             break
 
         output = tf.concat([output, predictedID], axis=-1)

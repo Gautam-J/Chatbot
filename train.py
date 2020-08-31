@@ -26,11 +26,11 @@ MAXLEN = 40
 BATCH_SIZE = 32
 SHUFFLE_BUFFER_SIZE = 100000
 
-EPOCHS = 5
-NUM_LAYERS = 2
-D_MODEL = 256
+EPOCHS = 20
+NUM_LAYERS = 6
+D_MODEL = 512
 NUM_HEADS = 8
-UNITS = 512
+UNITS = 2048
 DROPOUT = 0.1
 
 
@@ -38,9 +38,6 @@ def main():
     # Load text data
     print('[INFO] Loading text data')
     queries, responses = loadConversations()
-
-    # using only 1000 datapoints for faster training
-    queries, responses = queries[:1000], responses[:1000]
 
     # fit tokenizer on corpus
     print('[INFO] Fitting tokenizer on corpus')
@@ -65,8 +62,6 @@ def main():
         queries, responses, batch_size=BATCH_SIZE,
         shuffer_buffer_size=SHUFFLE_BUFFER_SIZE
     )
-
-    print(dataset)
 
     model = getTransformerModel(
         vocab_size=data_configs.VOCAB_SIZE,

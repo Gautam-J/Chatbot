@@ -30,10 +30,10 @@ def plotSamplePostionalEncoding():
 
 def plotSampleEncoderLayer():
     sampleEncoderLayer = getEncoderLayer(
-        units=512,
-        d_model=128,
-        num_heads=4,
-        dropout=0.3,
+        units=2048,
+        d_model=512,
+        num_heads=8,
+        dropout=0.1,
         name="sample_encoder_layer"
     )
 
@@ -45,11 +45,11 @@ def plotSampleEncoderLayer():
 def plotSampleEncoderBlock():
     sampleEncoderBlock = getEncoderBlock(
         vocab_size=8192,
-        num_layers=2,
-        units=512,
-        d_model=128,
-        num_heads=4,
-        dropout=0.3,
+        num_layers=6,
+        units=2048,
+        d_model=512,
+        num_heads=8,
+        dropout=0.1,
         name="sample_encoder"
     )
 
@@ -60,10 +60,10 @@ def plotSampleEncoderBlock():
 
 def plotSampleDecoderLayer():
     sampleDecoderLayer = getDecoderLayer(
-        units=512,
-        d_model=128,
-        num_heads=4,
-        dropout=0.3,
+        units=2048,
+        d_model=512,
+        num_heads=8,
+        dropout=0.1,
         name="sample_decoder_layer"
     )
 
@@ -75,11 +75,11 @@ def plotSampleDecoderLayer():
 def plotSampleDecoderBlock():
     sampleDecoderBlock = getDecoderBlock(
         vocab_size=8192,
-        num_layers=2,
-        units=512,
-        d_model=128,
-        num_heads=4,
-        dropout=0.3,
+        num_layers=6,
+        units=2048,
+        d_model=512,
+        num_heads=8,
+        dropout=0.1,
         name="sample_decoder"
     )
 
@@ -91,11 +91,11 @@ def plotSampleDecoderBlock():
 def plotSampleTransformerModel():
     sampleTransformerModel = getTransformerModel(
         vocab_size=8192,
-        num_layers=4,
-        units=512,
-        d_model=128,
-        num_heads=4,
-        dropout=0.3,
+        num_layers=6,
+        units=2048,
+        d_model=512,
+        num_heads=8,
+        dropout=0.1,
         name="sample_transformer"
     )
 
@@ -105,9 +105,9 @@ def plotSampleTransformerModel():
 
 
 def plotSampleLearningRateSchedule():
-    sampleLearningRate = CustomSchedule(d_model=128)
+    sampleLearningRate = CustomSchedule(d_model=512)
 
-    plt.plot(sampleLearningRate(tf.range(200000, dtype=tf.float32)))
+    plt.plot(sampleLearningRate(tf.range(100000, dtype=tf.float32)))
     plt.ylabel("Learning Rate")
     plt.xlabel("Train Step")
     plt.savefig('models/learningRateSchedule.png')

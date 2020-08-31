@@ -1,7 +1,7 @@
 import os
 import re
 import tensorflow as tf
-from tensorflow_datasets.features.text import SubwordTextEncoder
+import tensorflow_datasets as tfds
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
@@ -61,14 +61,14 @@ def fitTokenizerToCorpus(corpus, target_vocab_size=2**13):
 
     global START_TOKEN, END_TOKEN, VOCAB_SIZE
 
-    tokenizer = SubwordTextEncoder.build_from_corpus(
+    tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(
         corpus, target_vocab_size=target_vocab_size
     )
 
     START_TOKEN, END_TOKEN = [tokenizer.vocab_size], [tokenizer.vocab_size + 1]
     VOCAB_SIZE = tokenizer.vocab_size + 2
 
-    tokenizer.save_to_file('myTokenizer')
+    tokenizer.save_to_file('models/myTokenizer')
 
     return tokenizer
 
@@ -84,7 +84,8 @@ def tokenizeData(data, tokenizer):
 
 
 def padTokenizedData(data, maxlen=40):
-    global maxlen
+    global MAXLEN
+    MAXLEN = maxlen
 
     paddedData = pad_sequences(data, maxlen=maxlen, padding='post',
                                truncating='post')
@@ -92,7 +93,7 @@ def padTokenizedData(data, maxlen=40):
     return paddedData
 
 
-def getTfDataset(inputs, outputs, batch_size=32, shuffer_buffer_size=1e5):
+def getTfDataset(inputs, outputs, batch_size=32, shuffer_buffer_size=100000):
 
     dataset = tf.data.Dataset.from_tensor_slices((
         {'inputs': inputs,
@@ -100,9 +101,9 @@ def getTfDataset(inputs, outputs, batch_size=32, shuffer_buffer_size=1e5):
         {'outputs': outputs[:, 1:]}
     ))
 
-    dataset = dataset.cache()
     dataset = dataset.shuffle(shuffer_buffer_size)
     dataset = dataset.batch(batch_size)
+    dataset = dataset.cache()
     dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
 
     return dataset

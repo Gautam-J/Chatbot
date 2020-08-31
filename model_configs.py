@@ -1,5 +1,5 @@
 import tensorflow as tf
-from data_configs import MAXLEN
+import data_configs
 
 
 def getScaledDotProductAttention(query, key, value, mask):
@@ -259,7 +259,7 @@ def getTransformerModel(vocab_size, num_layers, units, d_model, num_heads,
 
 
 def customLossFunction(y_true, y_pred):
-    y_true = tf.reshape(y_true, shape=(-1, MAXLEN - 1))
+    y_true = tf.reshape(y_true, shape=(-1, data_configs.MAXLEN - 1))
 
     loss = tf.keras.losses.SparseCategoricalCrossentropy(
         from_logits=True, reduction='none')(y_true, y_pred)
@@ -287,5 +287,22 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
 
 
 def customAccuracyMetric(y_true, y_pred):
-    y_true = tf.reshape(y_true, shape=(-1, MAXLEN - 1))
+    y_true = tf.reshape(y_true, shape=(-1, data_configs.MAXLEN - 1))
     return tf.keras.metrics.sparse_categorical_accuracy(y_true, y_pred)
+
+
+def getCallbacks():
+
+    modelCheckpoint = tf.keras.callbacks.ModelCheckPoint(
+        filepath='models/weights_{epoch:02d}_{loss:.4f}.hdf5',
+        monitor='loss',
+        save_best_only=False,
+        save_weights_only=True,
+    )
+
+    csvLogger = tf.keras.callbacks.CSVLogger(
+        filename='training_history.csv',
+        append=True
+    )
+
+    return [modelCheckpoint, csvLogger]

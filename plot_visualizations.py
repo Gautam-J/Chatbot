@@ -121,7 +121,7 @@ def plotSequenceLengthHistogram(corpus):
     plt.savefig('models/sequenceLengths.png')
 
 
-def plotTrainingHistory(history):
+def plotTrainingHistory(path_to_csv_logger_file):
     pass
 
 

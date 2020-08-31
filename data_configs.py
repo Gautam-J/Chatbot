@@ -84,7 +84,12 @@ def tokenizeData(data, tokenizer):
 
 
 def padTokenizedData(data, maxlen=40):
-    return pad_sequences(data, maxlen=maxlen, padding='post', truncating='post')
+    global maxlen
+
+    paddedData = pad_sequences(data, maxlen=maxlen, padding='post',
+                               truncating='post')
+
+    return paddedData
 
 
 def getTfDataset(inputs, outputs, batch_size=32, shuffer_buffer_size=1e5):

@@ -293,7 +293,7 @@ def customAccuracyMetric(y_true, y_pred):
 
 def getCallbacks():
 
-    modelCheckpoint = tf.keras.callbacks.ModelCheckPoint(
+    modelCheckpoint = tf.keras.callbacks.ModelCheckpoint(
         filepath='models/weights_{epoch:02d}_{loss:.4f}.hdf5',
         monitor='loss',
         save_best_only=False,
@@ -301,7 +301,7 @@ def getCallbacks():
     )
 
     csvLogger = tf.keras.callbacks.CSVLogger(
-        filename='training_history.csv',
+        filename='models/training_history.csv',
         append=True
     )
 

@@ -9,6 +9,7 @@ from model_configs import (
 )
 
 import seaborn as sns
+import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
@@ -24,6 +25,7 @@ def plotSamplePostionalEncoding():
     plt.ylabel('Position')
     plt.colorbar()
     plt.savefig('models/positionalEncoding.png')
+    plt.close()
 
 
 def plotSampleEncoderLayer():
@@ -109,18 +111,30 @@ def plotSampleLearningRateSchedule():
     plt.ylabel("Learning Rate")
     plt.xlabel("Train Step")
     plt.savefig('models/learningRateSchedule.png')
+    plt.close()
 
 
 def plotSequenceLengthHistogram(corpus):
-    sequenceLengths = [len(sentence.split()) for sentence in corpus]
+    sequenceLengths = [len(sentence) for sentence in corpus]
 
     sns.distplot(sequenceLengths, bins=100)
     plt.xlim(-10, 100)
     plt.savefig('models/sequenceLengths.png')
+    plt.close()
 
 
 def plotTrainingHistory(path_to_csv_logger_file):
-    pass
+    df = pd.read_csv(path_to_csv_logger_file)
+
+    for column in df.columns:
+        if not column == 'epoch':
+            plt.plot(df['epoch'], df[column], label=column)
+            plt.title(column)
+            plt.xlabel('Epoch')
+            plt.ylabel(column)
+            plt.legend()
+            plt.savefig(f'models/training_history_{column}.png')
+            plt.close()
 
 
 if __name__ == '__main__':

@@ -54,7 +54,7 @@ def plotSampleEncoderBlock():
     )
 
     tf.keras.utils.plot_model(
-        sampleEncoderBlock, to_file='models/encoder.png', show_shapes=True
+        sampleEncoderBlock, to_file='models/encoderBlock.png', show_shapes=True
     )
 
 
@@ -68,7 +68,7 @@ def plotSampleDecoderLayer():
     )
 
     tf.keras.utils.plot_model(
-        sampleDecoderLayer, to_file='models/decoder_layer.png', show_shapes=True
+        sampleDecoderLayer, to_file='models/decoderLayer.png', show_shapes=True
     )
 
 
@@ -84,7 +84,7 @@ def plotSampleDecoderBlock():
     )
 
     tf.keras.utils.plot_model(
-        sampleDecoderBlock, to_file='models/decoder.png', show_shapes=True
+        sampleDecoderBlock, to_file='models/decoderBlock.png', show_shapes=True
     )
 
 

@@ -95,7 +95,7 @@ def preprocessSentence(sentence):
 
 def fitTokenizerToCorpus(corpus, vocab_size=None):
     # initialize tokenizer with no filters, vocab_size, and out of vocabulary token
-    tokenizer = Tokenizer(filters='', num_words=vocab_size, oov_token='<OOV>')
+    tokenizer = Tokenizer(filters='', num_words=vocab_size, oov_token=s.OUTOFVOCABULARY_TOKEN)
 
     # fit on data
     tokenizer.fit_on_texts(corpus)

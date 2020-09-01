@@ -1,96 +1,133 @@
-import os
 import re
+import json
 import tensorflow as tf
-import tensorflow_datasets as tfds
 from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.text import Tokenizer, tokenizer_from_json
+
+import settings as s
+
+
+def loadLines(path_to_lines):
+    fields = ["lineID", "characterID", "movieID", "character", "text"]
+
+    lines = {}
+    with open(path_to_lines, 'r', encoding='iso-8859-1') as f:
+        for line in f:
+            values = line.split(' +++$+++ ')
+
+            lineObject = {}
+            for i, field in enumerate(fields):
+                lineObject[field] = values[i]
+
+            lines[lineObject['lineID']] = lineObject
+
+    return lines
+
+
+def loadConversations(path_to_conversations, lines):
+    fields = [
+        "character1ID",
+        "character2ID",
+        "movieID",
+        "utteranceIDs"
+    ]
+
+    conversations = []
+    with open(path_to_conversations, 'r', encoding='iso-8859-1') as f:
+        for line in f:
+            values = line.split(' +++$+++ ')
+
+            convObject = {}
+            for i, field in enumerate(fields):
+                convObject[field] = values[i]
+
+            # convert string to list
+            utteranceIdPattern = re.compile('L[0-9]+')
+            lineIds = utteranceIdPattern.findall(convObject['utteranceIDs'])
+
+            # reassemble lines
+            convObject['lines'] = []
+            for lineId in lineIds:
+                convObject['lines'].append(lines[lineId])
+
+            conversations.append(convObject)
+
+    return conversations
+
+
+def getConversations(path_to_lines, path_to_conversations):
+    lines = loadLines(path_to_lines)
+    conversations = loadConversations(path_to_conversations, lines)
+
+    pairs = []
+    for conv in conversations:
+        for i in range(len(conv['lines']) - 1):
+            query = conv['lines'][i]['text'].strip()
+            response = conv['lines'][i + 1]['text'].strip()
+
+            if query and response:
+                pairs.append([query, response])
+
+    return zip(*pairs)
 
 
 def preprocessSentence(sentence):
-    # lowercase all and remove whitespace
+    # lower case all letters and remove whitespace
     sentence = sentence.lower().strip()
 
-    # add space between punctuation and word
-    sentence = re.sub(r"([?.!,])", r" \1", sentence)
+    # add space before and after punctuations r"([<punctuations>])"
+    sentence = re.sub(r"([?.!,])", r" \1 ", sentence)
+
+    # add space for any char outside r"[<allowedCharacters>]"
+    sentence = re.sub(r"[^a-zA-Z?.!,]+", " ", sentence)
+
+    # remove extra spaces, only one space character allowed
     sentence = re.sub(r'[" "]+', " ", sentence)
 
-    # replace everything with space except (a-z, A-Z, ".", "?", "!", ",")
-    sentence = re.sub(r"[^a-zA-Z?.!,]+", " ", sentence)
+    # remove whitespace again
     sentence = sentence.strip()
+
+    # add tags in the beginning and end
+    sentence = s.STARTOFSENTENCE_TOKEN + ' ' + sentence + ' ' + s.ENDOFSENTENCE_TOKEN
 
     return sentence
 
 
-def getIdToLineDictionary():
+def fitTokenizerToCorpus(corpus, vocab_size=None):
+    # initialize tokenizer with no filters, vocab_size, and out of vocabulary token
+    tokenizer = Tokenizer(filters='', num_words=vocab_size, oov_token='<OOV>')
 
-    pathToMovieLines = os.path.join('data', 'movie_lines.txt')
+    # fit on data
+    tokenizer.fit_on_texts(corpus)
 
-    # dictionary of line id to text
-    idToLine = {}
-
-    with open(pathToMovieLines, errors='ignore') as f:
-        lines = f.readlines()
-
-    for line in lines:
-        parts = line.replace('\n', '').split(' +++$+++ ')
-        idToLine[parts[0]] = parts[4]
-
-    return idToLine
+    return tokenizer
 
 
-def loadConversations():
+def saveTokenizer(path_to_file, tokenizer):
+    tk_json = tokenizer.to_json()
 
-    pathToMovieConversations = os.path.join('data', 'movie_conversations.txt')
-    idToLine = getIdToLineDictionary()
-    queries, responses = [], []
+    with open(path_to_file, 'w') as f:
+        json.dump(tk_json, f)
 
-    with open(pathToMovieConversations) as f:
-        lines = f.readlines()
-
-    for line in lines:
-        parts = line.replace('\n', '').split(' +++$+++ ')
-        conversation = [line[1:-1] for line in parts[3][1:-1].split(', ')]
-
-        for i in range(len(conversation) - 1):
-            queries.append(preprocessSentence(idToLine[conversation[i]]))
-            responses.append(preprocessSentence(idToLine[conversation[i + 1]]))
-
-    return queries, responses
+    print('[INFO] Saved tokenizer')
 
 
-def fitTokenizerToCorpus(corpus, target_vocab_size=2**13):
+def loadTokenizer(path_to_file):
 
-    global START_TOKEN, END_TOKEN, VOCAB_SIZE
+    with open(path_to_file) as f:
+        tk_json = json.load(f)
 
-    tokenizer = tfds.features.text.SubwordTextEncoder.build_from_corpus(
-        corpus, target_vocab_size=target_vocab_size
-    )
-
-    START_TOKEN, END_TOKEN = [tokenizer.vocab_size], [tokenizer.vocab_size + 1]
-    VOCAB_SIZE = tokenizer.vocab_size + 2
-
-    tokenizer.save_to_file('models/myTokenizer')
+    tokenizer = tokenizer_from_json(tk_json)
 
     return tokenizer
 
 
 def tokenizeData(data, tokenizer):
-
-    tokenizedData = []
-    for sentence in data:
-        sentence = START_TOKEN + tokenizer.encode(sentence) + END_TOKEN
-        tokenizedData.append(sentence)
-
-    return tokenizedData
+    return tokenizer.texts_to_sequences(data)
 
 
-def padTokenizedData(data, maxlen=40):
-    global MAXLEN
-    MAXLEN = maxlen
-
-    paddedData = pad_sequences(data, maxlen=maxlen, padding='post',
-                               truncating='post')
-
-    return paddedData
+def padData(data, maxlen=None):
+    return pad_sequences(data, maxlen=maxlen, padding='post', truncating='post')
 
 
 def getTfDataset(inputs, outputs, batch_size=32, shuffer_buffer_size=100000):

@@ -8,7 +8,6 @@ from model_configs import (
     CustomSchedule
 )
 
-import seaborn as sns
 import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -111,15 +110,6 @@ def plotSampleLearningRateSchedule():
     plt.ylabel("Learning Rate")
     plt.xlabel("Train Step")
     plt.savefig('models/learningRateSchedule.png')
-    plt.close()
-
-
-def plotSequenceLengthHistogram(corpus):
-    sequenceLengths = [len(sentence) for sentence in corpus]
-
-    sns.distplot(sequenceLengths, bins=100)
-    plt.xlim(-10, 100)
-    plt.savefig('models/sequenceLengths.png')
     plt.close()
 
 

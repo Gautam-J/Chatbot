@@ -294,7 +294,7 @@ def accuracy(y_true, y_pred):
 def getCallbacks():
 
     modelCheckpoint = tf.keras.callbacks.ModelCheckpoint(
-        filepath='models/weights_{epoch:02d}_{loss:.4f}.hdf5',
+        filepath='models/weights_{epoch:02d}_{loss:.4f}',
         monitor='loss',
         save_best_only=False,
         save_weights_only=True,

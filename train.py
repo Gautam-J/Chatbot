@@ -23,14 +23,6 @@ from plot_visualizations import (
 import settings as s
 from tensorflow.keras.optimizers import Adam
 
-
-def printQueryResponse(query, response, n=3):
-    for q, r in zip(query[:n], response[:n]):
-        print('Query:', q)
-        print('Response:', r)
-        print()
-
-
 # Load text data
 print('[INFO] Loading text data')
 queries, responses = getConversations(
@@ -38,20 +30,14 @@ queries, responses = getConversations(
     'data/movie_conversations.txt'
 )
 
-printQueryResponse(queries, responses)
-
 # preprocess sentence
 print('[INFO] Preprocessing data')
 queries = list(map(preprocessSentence, queries))
 responses = list(map(preprocessSentence, responses))
 
-printQueryResponse(queries, responses)
-
 # fit tokenizer on corpus
 print('[INFO] Fitting tokenizer on corpus')
 tokenizer = fitTokenizerToCorpus(queries + responses, vocab_size=s.VOCAB_SIZE)
-
-print('[INFO] Vocab Size:', len(tokenizer.word_index))
 
 # save tokenizer to disk
 saveTokenizer('models/myTokenizer.json', tokenizer)
@@ -61,14 +47,10 @@ print('[INFO] Tokenizing data')
 queries = tokenizeData(queries, tokenizer)
 responses = tokenizeData(responses, tokenizer)
 
-printQueryResponse(queries, responses)
-
 # pad sequences
 print('[INFO] Padding sequences')
-queries = padData(queries, maxlen=s.MAXLEN)
-responses = padData(responses, maxlen=s.MAXLEN)
-
-printQueryResponse(queries, responses)
+queries = padData(queries, maxlen=s.SEQUENCE_LENGTH)
+responses = padData(responses, maxlen=s.SEQUENCE_LENGTH)
 
 # get tf.data.Dataset
 print('[INFO] Fetching tf.data.Dataset')

@@ -1,16 +1,15 @@
-from utils import (
-    loadTrainedTransformerModel,
-    loadFitTokenizer,
-    predict
-)
+from data_configs import loadTokenizer
+from utils import loadTrainedTransformerModel, predict
 
-tokenizer = loadFitTokenizer('models/myTokenizer')
-model = loadTrainedTransformerModel('models/final_model_weight.hdf5', tokenizer)
+tokenizer = loadTokenizer('models/myTokenizer.json')
+model = loadTrainedTransformerModel('models/final_model_weight')
 
 while True:
-    userInput = input('Enter your query [q to quit]: ')
+    userInput = input('You: ')
 
     if userInput == 'q':
         break
 
-    predict(userInput, model, tokenizer)
+    predictedResponse = predict(userInput, model, tokenizer)
+    print('AI:', predictedResponse)
+    print()

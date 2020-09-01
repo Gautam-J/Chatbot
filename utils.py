@@ -1,9 +1,7 @@
 import tensorflow as tf
-import tensorflow_datasets as tfds
 from tensorflow.keras.optimizers import Adam
 
-import train
-from data_configs import preprocessSentence
+from data_configs import preprocessSentence, padData
 
 from model_configs import (
     getTransformerModel,
@@ -12,19 +10,21 @@ from model_configs import (
     accuracy
 )
 
+import settings as s
 
-def loadTrainedTransformerModel(path_to_model, tokenizer):
+
+def loadTrainedTransformerModel(path_to_model):
     model = getTransformerModel(
-        vocab_size=tokenizer.vocab_size + 2,
-        num_layers=train.NUM_LAYERS,
-        units=train.UNITS,
-        d_model=train.D_MODEL,
-        num_heads=train.NUM_HEADS,
-        dropout=train.DROPOUT
+        vocab_size=s.VOCAB_SIZE,
+        num_layers=s.NUM_LAYERS,
+        units=s.UNITS,
+        d_model=s.D_MODEL,
+        num_heads=s.NUM_HEADS,
+        dropout=s.DROPOUT
     )
 
     # configure optimizer
-    learningRate = CustomSchedule(train.D_MODEL, warmup_steps=4000)
+    learningRate = CustomSchedule(s.D_MODEL, warmup_steps=4000)
     optimizer = Adam(learningRate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
 
     # compile model with custom metrics
@@ -39,26 +39,19 @@ def loadTrainedTransformerModel(path_to_model, tokenizer):
     return model
 
 
-def loadFitTokenizer(path_to_tokenizer):
-    return tfds.features.text.SubwordTextEncoder.load_from_file(path_to_tokenizer)
-
-
 def evaluate(sentence, model, tokenizer):
     sentence = preprocessSentence(sentence)
+    sentence = tokenizer.texts_to_sequences(sentence)
+    sentence = padData(sentence, s.MAXLEN)
 
-    sentence = tf.expand_dims(
-        [tokenizer.vocab_size] + tokenizer.encode(sentence) + [tokenizer.vocab_size + 1],
-        axis=0
-    )
+    output = tf.expand_dims(tokenizer.word_index[s.STARTOFSENTENCE_TOKEN], 0)
 
-    output = tf.expand_dims([tokenizer.vocab_size], 0)
-
-    for i in range(train.MAXLEN):
+    for i in range(s.MAXLEN):
         predictions = model.predict([sentence, output])
         predictions = predictions[:, -1:, :]
         predictedID = tf.cast(tf.argmax(predictions, axis=-1), tf.int32)
 
-        if tf.equal(predictedID, tokenizer.vocab_size + 1):
+        if tf.equal(predictedID, tokenizer.word_index[s.ENDOFSENTENCE_TOKEN]):
             break
 
         output = tf.concat([output, predictedID], axis=-1)
@@ -68,14 +61,7 @@ def evaluate(sentence, model, tokenizer):
 
 def predict(sentence, model, tokenizer):
     prediction = evaluate(sentence, model, tokenizer)
-
-    predictedSentence = tokenizer.decode(
-        [i for i in prediction if i < tokenizer.vocab_size]
-    )
-
-    print('=' * 85)
-    print('Input:', sentence)
-    print('Output:', predictedSentence)
-    print()
+    prediction = tokenizer.sequences_to_texts(prediction)
+    predictedSentence = ' '.join(prediction)
 
     return predictedSentence

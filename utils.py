@@ -41,13 +41,13 @@ def loadTrainedTransformerModel(path_to_model):
 
 def evaluate(sentence, model, tokenizer):
     sentence = preprocessSentence(sentence)
-    sentence = tokenizer.texts_to_sequences(sentence)
-    sentence = padData(sentence, s.MAXLEN)
+    sentence = tokenizer.texts_to_sequences([sentence])
+    sentence = padData(sentence, s.SEQUENCE_LENGTH)
 
-    output = tf.expand_dims(tokenizer.word_index[s.STARTOFSENTENCE_TOKEN], 0)
+    output = tf.expand_dims([tokenizer.word_index[s.STARTOFSENTENCE_TOKEN]], 0)
 
-    for i in range(s.MAXLEN):
-        predictions = model.predict([sentence, output])
+    for i in range(s.SEQUENCE_LENGTH):
+        predictions = model([sentence, output], training=False)
         predictions = predictions[:, -1:, :]
         predictedID = tf.cast(tf.argmax(predictions, axis=-1), tf.int32)
 
@@ -61,7 +61,7 @@ def evaluate(sentence, model, tokenizer):
 
 def predict(sentence, model, tokenizer):
     prediction = evaluate(sentence, model, tokenizer)
-    prediction = tokenizer.sequences_to_texts(prediction)
-    predictedSentence = ' '.join(prediction)
+    prediction = tokenizer.sequences_to_texts([prediction.numpy()])
+    predictedSentence = prediction[0].lstrip(s.STARTOFSENTENCE_TOKEN + ' ')
 
     return predictedSentence

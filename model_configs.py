@@ -286,7 +286,7 @@ class CustomSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
         return tf.math.rsqrt(self.d_model) * tf.math.minimum(arg1, arg2)
 
 
-def customAccuracyMetric(y_true, y_pred):
+def accuracy(y_true, y_pred):
     y_true = tf.reshape(y_true, shape=(-1, data_configs.MAXLEN - 1))
     return tf.keras.metrics.sparse_categorical_accuracy(y_true, y_pred)
 

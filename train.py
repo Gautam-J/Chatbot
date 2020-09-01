@@ -10,7 +10,7 @@ from model_configs import (
     getTransformerModel,
     CustomSchedule,
     customLossFunction,
-    customAccuracyMetric,
+    accuracy,
     getCallbacks
 )
 
@@ -23,10 +23,10 @@ import data_configs
 from tensorflow.keras.optimizers import Adam
 
 MAXLEN = 40
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 SHUFFLE_BUFFER_SIZE = 100000
 
-EPOCHS = 15
+EPOCHS = 50
 NUM_LAYERS = 2
 D_MODEL = 256
 NUM_HEADS = 8
@@ -82,7 +82,7 @@ def main():
     model.compile(
         optimizer=optimizer,
         loss=customLossFunction,
-        metrics=[customAccuracyMetric]
+        metrics=[accuracy]
     )
 
     # train model with callbacks

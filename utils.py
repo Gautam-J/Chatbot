@@ -1,9 +1,16 @@
 import tensorflow as tf
 import tensorflow_datasets as tfds
+from tensorflow.keras.optimizers import Adam
 
 import train
 from data_configs import preprocessSentence
-from model_configs import getTransformerModel
+
+from model_configs import (
+    getTransformerModel,
+    CustomSchedule,
+    customLossFunction,
+    accuracy
+)
 
 
 def loadTrainedTransformerModel(path_to_model, tokenizer):
@@ -14,6 +21,17 @@ def loadTrainedTransformerModel(path_to_model, tokenizer):
         d_model=train.D_MODEL,
         num_heads=train.NUM_HEADS,
         dropout=train.DROPOUT
+    )
+
+    # configure optimizer
+    learningRate = CustomSchedule(train.D_MODEL, warmup_steps=4000)
+    optimizer = Adam(learningRate, beta_1=0.9, beta_2=0.98, epsilon=1e-9)
+
+    # compile model with custom metrics
+    model.compile(
+        optimizer=optimizer,
+        loss=customLossFunction,
+        metrics=[accuracy]
     )
 
     model.load_weights(path_to_model)

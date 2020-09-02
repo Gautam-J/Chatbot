@@ -12,7 +12,7 @@ def getScaledDotProductAttention(query, key, value, mask):
 
     # set -Inf (softmax >> zero) for padding tokens
     if mask is not None:
-        logits += (mask + -1e9)
+        logits += (mask * -1e9)
 
     # softmax normalization
     attentionWeights = tf.nn.softmax(logits, axis=-1)
@@ -100,13 +100,16 @@ class PositionalEncoding(tf.keras.layers.Layer):
             d_model=d_model
         )
 
-        # apply sine to even index
-        sines = tf.math.sin(angleRads[:, 0::2])
-        # apply cosine to odd index
-        cosines = tf.math.cos(angleRads[:, 1::2])
+        angleRads = angleRads.numpy()
 
-        posEncoding = tf.concat([sines, cosines], axis=-1)
-        posEncoding = posEncoding[tf.newaxis, ...]
+        # apply sine to even index
+        angleRads[:, 0::2] = tf.math.sin(angleRads[:, 0::2])
+        # apply cosine to odd index
+        angleRads[:, 1::2] = tf.math.cos(angleRads[:, 1::2])
+
+        angleRads = tf.convert_to_tensor(angleRads, dtype=tf.float32)
+
+        posEncoding = angleRads[tf.newaxis, ...]
 
         return tf.cast(posEncoding, tf.float32)
 

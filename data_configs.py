@@ -55,7 +55,7 @@ def loadConversations(path_to_conversations, lines):
     return conversations
 
 
-def getConversations(path_to_lines, path_to_conversations):
+def getConversations(path_to_lines, path_to_conversations, percent=1.0):
     lines = loadLines(path_to_lines)
     conversations = loadConversations(path_to_conversations, lines)
 
@@ -67,6 +67,14 @@ def getConversations(path_to_lines, path_to_conversations):
 
             if query and response:
                 pairs.append([query, response])
+
+    totalDatasetSize = len(pairs)
+    percentIndex = int(totalDatasetSize * percent)
+    pairs = pairs[:percentIndex]
+
+    print('[INFO] Total Dataset size:', totalDatasetSize)
+    print('[INFO] Percent to use:', percent)
+    print('[INFO] Dataset used:', len(pairs))
 
     return zip(*pairs)
 
@@ -99,6 +107,9 @@ def fitTokenizerToCorpus(corpus, vocab_size=None):
 
     # fit on data
     tokenizer.fit_on_texts(corpus)
+
+    print('[INFO] Total vocab size:', len(tokenizer.word_index))
+    print('[INFO] Given vocab size:', vocab_size)
 
     return tokenizer
 

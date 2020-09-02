@@ -27,7 +27,8 @@ from tensorflow.keras.optimizers import Adam
 print('[INFO] Loading text data')
 queries, responses = getConversations(
     'data/movie_lines.txt',
-    'data/movie_conversations.txt'
+    'data/movie_conversations.txt',
+    percent=s.DATASET_SIZE
 )
 
 # preprocess sentence
